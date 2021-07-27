@@ -2,16 +2,16 @@
 Example code for how to use a tlc5940 chip with the raspberry pi pico
 
 Requires:
-  Pins 1-5 (can be changed manually, but must be consecutive)
+  Pins 1-5 (or any 5 concurent gpio pins)
   PIO0 (can not run concurently with other programs even though it only uses SM0)
 
 Supports:
   Gray Scale Output (12 bit, 16 channel),
-  Encoding
+  Encoding,
+  Varied refresh rate
 
 Does not currently support:
   Dot Correction,
-  Varied Refresh Rates (although it is not to complex to change manually),
   LOD: Led Open Detection,
   TEF: Thermal Error Flag
   
@@ -35,4 +35,3 @@ Pinout-tlc5940:
   
   
 If using to controll leds connect the cathode of the led to the outputs of the tlc5940
-  
