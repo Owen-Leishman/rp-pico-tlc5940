@@ -5,9 +5,13 @@
 #include "encode.h"
 #include <stdio.h>
 
+#define refresh_rate    3000 //5000Hz max 30Hz min 3000Hz default
+#define clk_div         15130/refresh_rate 
+
+#define start_pin       1 //what GPIO pins the outputs start on ex. pin n = SIN, n+1 = SCLK, n+2 = BLANK etc...
 
 
-
+// a look up table used to do bit reverse
 uint16_t bit_reverse[4096] = 
 {0x0 ,0x800 ,0x400 ,0xc00 ,0x200 ,0xa00 ,0x600 ,0xe00 ,0x100 ,0x900 ,0x500 ,
 0xd00 ,0x300 ,0xb00 ,0x700 ,0xf00 ,0x80 ,0x880 ,0x480 ,0xc80 ,0x280 ,0xa80 ,
@@ -385,21 +389,22 @@ uint16_t bit_reverse[4096] =
 
 
 // this function sends data to the tlc5940, and then turns on the coast program which runs GSCLK and BLANK
+// can also be used if you pre-encode data to take up less ram
 void disp(uint32_t output[6]){
         pio_clear_instruction_memory(pio0);
-        serial_program_init();
+        serial_program_init(clk_div, start_pin);
         pio_sm_put_blocking(pio0, 0, output[0]);
         pio_sm_put_blocking(pio0, 0, output[1]);
         pio_sm_put_blocking(pio0, 0, output[2]);
         pio_sm_put_blocking(pio0, 0, output[3]);
         pio_sm_put_blocking(pio0, 0, output[4]);
         pio_sm_put_blocking(pio0, 0, output[5]);
-        sleep_ms(1);
+        sleep_us(90000/refresh_rate);
         pio_clear_instruction_memory(pio0);
-        coast_program_init();
+        coast_program_init(clk_div, start_pin);
 }
 
-// this encodes the data, as it needs to be bit reversed and then put into 32 bit numbers for output
+// this encodes the data, as it needs to be bit reversed and then put into 32 bit numbers for output and then runs disp
 void encode(uint16_t input[16]){
     uint32_t output[6];
     output[5] = (bit_reverse[input[0]]<<20) + (bit_reverse[input[1]]<<8) + (bit_reverse[input[2]]>>4);

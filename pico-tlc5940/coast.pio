@@ -7,55 +7,35 @@
 repeat:
     nop                         side 2
     nop                         side 2
-    nop                         side 2
-
     set y, 31                   side 0
     repeatc:
         set x, 31               side 0
         repeatd:
             nop                 side 8
-            nop                 side 8
-            nop                 side 0
             nop                 side 0
             nop                 side 8
-            nop                 side 8
-            nop                 side 0
             nop                 side 0
             nop                 side 8
-            nop                 side 8
             nop                 side 0
-            nop                 side 0
-            nop                 side 8
             nop                 side 8
             jmp x-- repeatd       side 0
         jmp y-- repeatc           side 0
     jmp repeat                    side 0
 
 
-
-
 % c-sdk {
-static inline void coast_program_init(){
+static inline void coast_program_init(int frequency, int start_pin){
     PIO pio = pio0;
     uint offset_2 = pio_add_program(pio, &coast_program);
     uint sm = 0;
     pio_sm_config c_2 = coast_program_get_default_config(offset_2);
-
-    sm_config_set_clkdiv(&c_2, 10);
-
-    sm_config_set_out_pins(&c_2, 1, 1);
-    pio_gpio_init(pio, 1);
-    pio_gpio_init(pio, 2);
-    pio_gpio_init(pio, 3);
-    pio_gpio_init(pio, 4);
-    pio_gpio_init(pio, 5);
-    pio_sm_set_consecutive_pindirs(pio, sm, 1, 5, true);
-
-   
-
-    sm_config_set_sideset_pins(&c_2, 2);
-
-
+    sm_config_set_clkdiv(&c_2, frequency);
+    pio_gpio_init(pio, start_pin+1);
+    pio_gpio_init(pio, start_pin+2);
+    pio_gpio_init(pio, start_pin+3);
+    pio_gpio_init(pio, start_pin+4);
+    pio_sm_set_consecutive_pindirs(pio, sm, start_pin, 5, true);
+    sm_config_set_sideset_pins(&c_2, start_pin+1);
     pio_sm_init(pio, sm, offset_2, &c_2);
     pio_sm_set_enabled(pio, sm, true);
 }
